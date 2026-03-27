@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CaloCal - Daily Tracker</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f7f8fc;
+            --surface-color: #ffffff;
+            --text-main: #111111;
+            --text-muted: #8e8e93;
+            --primary: #FF8A00;
+            --purple-card: #E0C3FC;
+            --yellow-card: #FEF3C7;
+            --green-card: #DCFCE7;
+            --red-text: #FF3B30;
+            --radius-lg: 28px;
+            --radius-md: 16px;
+            --radius-sm: 10px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        body.dark-mode {
+            --bg-color: #121212;
+            --surface-color: #1e1e1e;
+            --text-main: #f5f5f5;
+            --text-muted: #a0a0a5;
+            --purple-card: #3b2b4e;
+            --yellow-card: #453b1b;
+            --green-card: #1c3d28;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.5;
+            padding-bottom: 80px;
+        }
+
+        /* Container */
+        .app-container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 20px 20px;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-top: 10px;
+        }
+
+        .theme-toggle {
+            background: var(--surface-color);
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-main);
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .header-title h1 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-title h1 i {
+            color: var(--primary);
+        }
+
+        .avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--purple-card);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--text-main);
+            box-shadow: var(--shadow);
+        }
+
+        /* Tabs */
+        .time-tabs {
+            display: flex;
+            gap: 5px;
+            background: var(--surface-color);
+            padding: 5px;
+            border-radius: 50px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .time-tabs button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            border-radius: 50px;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .time-tabs button.active {
+            background: var(--text-main);
+            color: var(--bg-color);
+        }
+
+        /* Tracker Dashboard */
+        .dashboard-card {
+            background: var(--surface-color);
+            border-radius: var(--radius-lg);
+            padding: 30px 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .dashboard-header h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .edit-btn {
+            border: none;
+            background: #f0f0f5;
+            color: var(--text-main);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .edit-btn {
+            background: #333;
+        }
+
+        /* SVG Semicircle */
+        .tracker-wrapper {
+            position: relative;
+            width: 260px;
+            height: 140px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .tracker-wrapper svg {
+            width: 100%;
+            height: 260px;
+            transform: rotate(-180deg);
+            transition: stroke-dashoffset 1s ease-out;
+        }
+
+        .tracker-bg {
+            fill: none;
+            stroke: var(--bg-color);
+            stroke-width: 18;
+            stroke-linecap: round;
+            stroke-dasharray: 4 10;
+        }
+
+        body.dark-mode .tracker-bg {
+            stroke: #333;
+        }
+
+        .tracker-fill {
+            fill: none;
+            stroke: var(--primary);
+            stroke-width: 18;
+            stroke-linecap: round;
+            stroke-dasharray: 534;
+            stroke-dashoffset: 534;
+            transition: stroke-dashoffset 1s ease-out;
+        }
+
+        .tracker-content {
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            right: 0;
+            text-align: center;
+        }
+
+        .tracker-content .icon-fire {
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .tracker-content h3 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 2px;
+        }
+
+        .tracker-content h3 span {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .tracker-content p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .toggle-remain-btn {
+            margin-top: 5px;
+            border: none;
+            background: rgba(255, 138, 0, 0.1);
+            color: var(--primary);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .toggle-remain-btn:hover {
+            background: rgba(255, 138, 0, 0.2);
+        }
+
+        /* Macros Row */
+        .macros-row {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px dashed var(--bg-color);
+        }
+
+        body.dark-mode .macros-row {
+            border-top-color: #333;
+        }
+
+        .macro-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .macro-item i {
+            font-size: 1.1rem;
+        }
+
+        .macro-item span {
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        .m-pro i {
+            color: #FF8A00;
+        }
+
+        .m-car i {
+            color: #4F46E5;
+        }
+
+        .m-fat i {
+            color: #10B981;
+        }
+
+        /* Daily Meals Section */
+        .meals-section {
+            margin-top: 10px;
+        }
+
+        .meals-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .meals-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        /* Accordion style Meal Cards */
+        .meal-card {
+            background: var(--surface-color);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 15px;
+        }
+
+        .meal-card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .meal-info h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .meal-info p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .add-btn {
+            background: var(--text-main);
+            color: var(--surface-color);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .add-btn:active {
+            transform: scale(0.9);
+        }
+
+        .meal-macros-mini {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .meal-macros-mini div {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .meal-macros-mini div span {
+            color: var(--text-main);
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .dot.pro {
+            background: #FF8A00;
+        }
+
+        .dot.car {
+            background: #4F46E5;
+        }
+
+        .dot.fat {
+            background: #10B981;
+        }
+
+        .added-foods {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            display: none;
+        }
+
+        .added-foods.active {
+            display: flex;
+        }
+
+        .added-food-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px;
+            background: var(--bg-color);
+            border-radius: var(--radius-md);
+        }
+
+        .added-food-item img {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-sm);
+            object-fit: cover;
+        }
+
+        .added-food-item .f-meta {
+            flex: 1;
+        }
+
+        .added-food-item .f-meta h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .added-food-item .f-meta h4 span {
+            background: var(--primary);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+        }
+
+        .added-food-item .f-meta p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .added-food-item .f-cal {
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .remove-f-btn {
+            background: transparent;
+            border: none;
+            color: var(--red-text);
+            font-size: 1.1rem;
+            padding: 5px;
+            cursor: pointer;
+        }
+
+        /* Multi-selection Food Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 1000;
+            display: none;
+            align-items: flex-end;
+            opacity: 0;
+            transition: opacity 0.3s;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-sheet {
+            background: var(--bg-color);
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            height: 85vh;
+            border-radius: 30px 30px 0 0;
+            display: flex;
+            flex-direction: column;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-overlay.active .modal-sheet {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 25px 15px;
+            background: var(--surface-color);
+            border-radius: 30px 30px 0 0;
+        }
+
+        .modal-header h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .close-modal {
+            background: #f0f0f5;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        body.dark-mode .close-modal {
+            background: #333;
+        }
+
+        /* Grid inside Modal */
+        .food-grid-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .food-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .food-pick-card {
+            background: var(--surface-color);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            text-align: center;
+            position: relative;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .food-pick-card img {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: var(--radius-sm);
+            object-fit: cover;
+            margin-bottom: 10px;
+        }
+
+        .food-pick-card h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .food-pick-card p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        /* Cart Controls */
+        .cart-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background: var(--bg-color);
+            border-radius: 20px;
+            padding: 4px;
+        }
+
+        .cart-btn {
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: var(--surface-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .cart-btn:active {
+            transform: scale(0.9);
+        }
+
+        .cart-btn.minus {
+            background: var(--text-muted);
+        }
+
+        .cart-btn.plus {
+            background: var(--primary);
+        }
+
+        .qty-val {
+            font-weight: 700;
+            font-size: 0.9rem;
+            width: 15px;
+        }
+
+        .modal-footer {
+            padding: 20px;
+            background: var(--surface-color);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        body.dark-mode .modal-footer {
+            border-top-color: #333;
+        }
+
+        .done-btn {
+            width: 100%;
+            background: var(--text-main);
+            color: var(--surface-color);
+            border: none;
+            padding: 16px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .done-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Responsive */
+        @media (min-width: 481px) {
+            body {
+                display: flex;
+                justify-content: center;
+                background: #e0e0e0;
+            }
+
+            body.dark-mode {
+                background: #0a0a0a;
+            }
+
+            .app-container {
+                background: var(--bg-color);
+                box-shadow: 0 0 50px rgba(0, 0, 0, 0.1);
+                margin: 20px 0;
+                border-radius: 40px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header>
+            <div class="header-title">
+                <h1><i class="fas fa-leaf"></i> CaloCal</h1>
+            </div>
+            <div style="display:flex; gap:12px; align-items:center;">
+                <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <div class="avatar"><i class="fas fa-user"></i></div>
+            </div>
+        </header>
+
+        <!-- Tabs -->
+        <div class="time-tabs">
+            <button class="active">Today</button>
+            <button>Weekly</button>
+        </div>
+
+        <!-- Main Dashboard Tracker -->
+        <section class="dashboard-card">
+            <div class="dashboard-header">
+                <h2>Calories</h2>
+                <button class="edit-btn" onclick="editTarget()">Edit Goal</button>
+            </div>
+
+            <div class="tracker-wrapper">
+                <svg viewBox="0 0 200 200">
+                    <circle class="tracker-bg" cx="100" cy="100" r="85"></circle>
+                    <circle class="tracker-fill" id="circle-progress" cx="100" cy="100" r="85"></circle>
+                </svg>
+                <div class="tracker-content">
+                    <i class="fas fa-fire icon-fire"></i>
+                    <h3 id="cals-display">0 <span id="cals-target-display">/ 2000</span></h3>
+                    <p id="cals-label">Intake Calorie</p>
+                </div>
+            </div>
+
+            <button class="toggle-remain-btn" onclick="toggleTrackerMode()" id="tracker-mode-btn">Show
+                Remaining</button>
+
+            <div class="macros-row">
+                <div class="macro-item m-pro"><i class="fas fa-drumstick-bite"></i> <span id="dash-pro">0</span>g</div>
+                <div class="macro-item m-car"><i class="fas fa-wheat-awn"></i> <span id="dash-car">0</span>g</div>
+                <div class="macro-item m-fat"><i class="fas fa-droplet"></i> <span id="dash-fat">0</span>g</div>
+            </div>
+        </section>
+
+        <!-- Daily Meals -->
+        <section class="meals-section">
+            <div class="meals-header">
+                <h2>Daily meals</h2>
+            </div>
+
+            <!-- Breakfast -->
+            <div class="meal-card">
+                <div class="meal-card-top">
+                    <div class="meal-info">
+                        <h3>Breakfast</h3>
+                        <p id="meal-cal-breakfast">0 kcal</p>
+                    </div>
+                    <button class="add-btn" onclick="openModal('breakfast')"><i class="fas fa-plus"></i></button>
+                </div>
+                <div class="meal-macros-mini">
+                    <div><span class="dot pro"></span> <span id="macro-pro-breakfast">0</span>g Pro</div>
+                    <div><span class="dot car"></span> <span id="macro-car-breakfast">0</span>g Car</div>
+                    <div><span class="dot fat"></span> <span id="macro-fat-breakfast">0</span>g Fat</div>
+                </div>
+                <div class="added-foods" id="list-breakfast"></div>
+            </div>
+
+            <!-- Lunch -->
+            <div class="meal-card">
+                <div class="meal-card-top">
+                    <div class="meal-info">
+                        <h3>Lunch</h3>
+                        <p id="meal-cal-lunch">0 kcal</p>
+                    </div>
+                    <button class="add-btn" onclick="openModal('lunch')"><i class="fas fa-plus"></i></button>
+                </div>
+                <div class="meal-macros-mini">
+                    <div><span class="dot pro"></span> <span id="macro-pro-lunch">0</span>g Pro</div>
+                    <div><span class="dot car"></span> <span id="macro-car-lunch">0</span>g Car</div>
+                    <div><span class="dot fat"></span> <span id="macro-fat-lunch">0</span>g Fat</div>
+                </div>
+                <div class="added-foods" id="list-lunch"></div>
+            </div>
+
+            <!-- Snacks -->
+            <div class="meal-card">
+                <div class="meal-card-top">
+                    <div class="meal-info">
+                        <h3>Snacks</h3>
+                        <p id="meal-cal-snacks">0 kcal</p>
+                    </div>
+                    <button class="add-btn" onclick="openModal('snacks')"><i class="fas fa-plus"></i></button>
+                </div>
+                <div class="meal-macros-mini">
+                    <div><span class="dot pro"></span> <span id="macro-pro-snacks">0</span>g Pro</div>
+                    <div><span class="dot car"></span> <span id="macro-car-snacks">0</span>g Car</div>
+                    <div><span class="dot fat"></span> <span id="macro-fat-snacks">0</span>g Fat</div>
+                </div>
+                <div class="added-foods" id="list-snacks"></div>
+            </div>
+
+            <!-- Dinner -->
+            <div class="meal-card">
+                <div class="meal-card-top">
+                    <div class="meal-info">
+                        <h3>Dinner</h3>
+                        <p id="meal-cal-dinner">0 kcal</p>
+                    </div>
+                    <button class="add-btn" onclick="openModal('dinner')"><i class="fas fa-plus"></i></button>
+                </div>
+                <div class="meal-macros-mini">
+                    <div><span class="dot pro"></span> <span id="macro-pro-dinner">0</span>g Pro</div>
+                    <div><span class="dot car"></span> <span id="macro-car-dinner">0</span>g Car</div>
+                    <div><span class="dot fat"></span> <span id="macro-fat-dinner">0</span>g Fat</div>
+                </div>
+                <div class="added-foods" id="list-dinner"></div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Food Selection Modal -->
+    <div class="modal-overlay" id="foodModal">
+        <div class="modal-sheet">
+            <div class="modal-header">
+                <h2>Add to <span id="modal-meal-name"
+                        style="color:var(--primary); text-transform:capitalize;">Breakfast</span></h2>
+                <button class="close-modal" onclick="closeModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="food-grid-container">
+                <div class="food-grid" id="foodGrid">
+                    <!-- Images injected here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="done-btn" onclick="commitSelection()"><i class="fas fa-check"></i> Add Foods</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Accurate user-provided macros including Fibre!
+        const foodDatabase = [
+            { id: 1, name: 'Boiled Egg (1)', image: 'images/boiledegg.jpeg', cals: 70, pro: 6, car: 0.6, fat: 5, fib: 0 },
+            { id: 2, name: 'Chapati (1)', image: 'images/chappati.jpeg', cals: 120, pro: 3, car: 20, fat: 3, fib: 2 },
+            { id: 3, name: 'Chicken Rice', image: 'images/chickenrice.jpeg', cals: 400, pro: 22, car: 45, fat: 12, fib: 3 },
+            { id: 4, name: 'Dosa (1)', image: 'images/dosaimage.jpeg', cals: 180, pro: 4, car: 28, fat: 4, fib: 1 },
+            { id: 5, name: 'Egg Rice', image: 'images/eggrice.jpeg', cals: 350, pro: 12, car: 45, fat: 11, fib: 2 },
+            { id: 6, name: 'Idli (1)', image: 'images/idly.jpeg', cals: 45, pro: 2, car: 9, fat: 0.5, fib: 1 },
+            { id: 7, name: 'Omelette (2 eggs)', image: 'images/omelette.jpeg', cals: 200, pro: 12, car: 2, fat: 14, fib: 0 },
+            { id: 8, name: 'Poori (1)', image: 'images/poori.jpeg', cals: 110, pro: 2.5, car: 15, fat: 6, fib: 1 },
+            { id: 9, name: 'Parotta (1)', image: 'images/poratta.jpeg', cals: 300, pro: 6, car: 40, fat: 14, fib: 2 },
+            { id: 10, name: 'Sambar', image: 'images/sambar.jpeg', cals: 100, pro: 5, car: 12, fat: 3, fib: 4 },
+            { id: 11, name: 'Scrambled Eggs (2)', image: 'images/scrambledeggs.jpeg', cals: 200, pro: 12, car: 2, fat: 14, fib: 0 },
+            { id: 12, name: 'White Rice (1c)', image: 'images/whiterice.jpeg', cals: 200, pro: 4, car: 45, fat: 0.5, fib: 1 }
+        ];
+
+        let state = {
+            target: 2000,
+            consumed: 0,
+            pro: 0, car: 0, fat: 0,
+            meals: { breakfast: [], lunch: [], snacks: [], dinner: [] }, // stores { id, qty }
+            activeModalMeal: '',
+            tempSelections: {}, // track { id: qty } in modal
+            showRemaining: false
+        };
+
+        function initApp() {
+            if (localStorage.getItem('calocal-theme-3') === 'dark') {
+                document.body.classList.add('dark-mode');
+                document.querySelector('#theme-toggle i').classList.replace('fa-moon', 'fa-sun');
+            }
+            const saved = localStorage.getItem('calocal-state-3');
+            if (saved) {
+                state = JSON.parse(saved);
+            }
+            // Ensure schema validity
+            if (!state.meals || !state.meals.breakfast) state.meals = { breakfast: [], lunch: [], snacks: [], dinner: [] };
+
+            buildFoodGrid();
+            saveAndRender();
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const icon = document.querySelector('#theme-toggle i');
+            if (document.body.classList.contains('dark-mode')) {
+                icon.classList.replace('fa-moon', 'fa-sun');
+                localStorage.setItem('calocal-theme-3', 'dark');
+            } else {
+                icon.classList.replace('fa-sun', 'fa-moon');
+                localStorage.setItem('calocal-theme-3', 'light');
+            }
+        }
+
+        function editTarget() {
+            const res = prompt("Enter daily calorie goal:", state.target);
+            if (res && !isNaN(res) && parseInt(res) > 0) {
+                state.target = parseInt(res);
+                saveAndRender();
+            }
+        }
+
+        function buildFoodGrid() {
+            const grid = document.getElementById('foodGrid');
+            grid.innerHTML = '';
+            foodDatabase.forEach(food => {
+                const card = document.createElement('div');
+                card.className = 'food-pick-card';
+                card.innerHTML = `
+                    <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+                        <img src="${food.image}" alt="${food.name}">
+                        <h4>${food.name}</h4>
+                        <p>${food.cals} kcal</p>
+                    </div>
+                    <div class="cart-controls">
+                        <button class="cart-btn minus" onclick="modCart(${food.id}, -1)">-</button>
+                        <span class="qty-val" id="qty-val-${food.id}">0</span>
+                        <button class="cart-btn plus" onclick="modCart(${food.id}, 1)">+</button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function openModal(mealKey) {
+            state.activeModalMeal = mealKey;
+            document.getElementById('modal-meal-name').textContent = mealKey;
+            state.tempSelections = {};
+
+            // clear cart UI
+            foodDatabase.forEach(f => {
+                document.getElementById(`qty-val-${f.id}`).textContent = '0';
+            });
+
+            const modal = document.getElementById('foodModal');
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('active'), 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('foodModal');
+            modal.classList.remove('active');
+            setTimeout(() => modal.style.display = 'none', 300);
+        }
+
+        function modCart(foodId, diff) {
+            if (!state.tempSelections[foodId]) state.tempSelections[foodId] = 0;
+            state.tempSelections[foodId] += diff;
+            if (state.tempSelections[foodId] < 0) state.tempSelections[foodId] = 0;
+
+            document.getElementById(`qty-val-${foodId}`).textContent = state.tempSelections[foodId];
+        }
+
+        function commitSelection() {
+            const mealKey = state.activeModalMeal;
+            for (const [fIdStr, qty] of Object.entries(state.tempSelections)) {
+                if (qty === 0) continue;
+                const fId = parseInt(fIdStr);
+                const existing = state.meals[mealKey].find(item => item.id === fId);
+
+                if (existing) {
+                    existing.qty += qty;
+                } else {
+                    state.meals[mealKey].push({ id: fId, qty: qty });
+                }
+            }
+            saveAndRender();
+            closeModal();
+        }
+
+        function removeAllOfFood(mealKey, foodId) {
+            state.meals[mealKey] = state.meals[mealKey].filter(item => item.id !== foodId);
+            saveAndRender();
+        }
+
+        function toggleTrackerMode() {
+            state.showRemaining = !state.showRemaining;
+            const btn = document.getElementById('tracker-mode-btn');
+            btn.textContent = state.showRemaining ? "Show Intake" : "Show Remaining";
+            updateDash();
+            localStorage.setItem('calocal-state-3', JSON.stringify(state));
+        }
+
+        function saveAndRender() {
+            state.consumed = 0; state.pro = 0; state.car = 0; state.fat = 0;
+            const mealKeys = ['breakfast', 'lunch', 'snacks', 'dinner'];
+
+            mealKeys.forEach(mk => {
+                let mCal = 0, mPro = 0, mCar = 0, mFat = 0;
+
+                state.meals[mk].forEach(item => {
+                    const fDef = foodDatabase.find(f => f.id === item.id);
+                    if (fDef) {
+                        mCal += fDef.cals * item.qty;
+                        mPro += fDef.pro * item.qty;
+                        mCar += fDef.car * item.qty;
+                        mFat += fDef.fat * item.qty;
+                    }
+                });
+
+                state.consumed += mCal; state.pro += mPro; state.car += mCar; state.fat += mFat;
+
+                document.getElementById(`meal-cal-${mk}`).textContent = `${mCal.toFixed(0)} kcal`;
+                document.getElementById(`macro-pro-${mk}`).textContent = mPro.toFixed(1);
+                document.getElementById(`macro-car-${mk}`).textContent = mCar.toFixed(1);
+                document.getElementById(`macro-fat-${mk}`).textContent = mFat.toFixed(1);
+
+                const listEl = document.getElementById(`list-${mk}`);
+                listEl.innerHTML = '';
+                if (state.meals[mk].length > 0) {
+                    listEl.classList.add('active');
+                    state.meals[mk].forEach(item => {
+                        const fDef = foodDatabase.find(f => f.id === item.id);
+                        if (fDef) {
+                            const div = document.createElement('div');
+                            div.className = 'added-food-item';
+                            div.innerHTML = `
+                                <img src="${fDef.image}" alt="">
+                                <div class="f-meta">
+                                    <h4>${fDef.name} <span style="background:var(--primary);color:white;padding:2px 8px;border-radius:10px;font-size:0.75rem;margin-left:6px;">x${item.qty}</span></h4>
+                                    <p>${(fDef.pro * item.qty).toFixed(1)}g Pro � ${(fDef.fib * item.qty).toFixed(1)}g Fib</p>
+                                </div>
+                                <div class="f-cal">${(fDef.cals * item.qty).toFixed(0)}</div>
+                                <button class="remove-f-btn" onclick="removeAllOfFood('${mk}', ${fDef.id})"><i class="fas fa-trash"></i></button>
+                            `;
+                            listEl.appendChild(div);
+                        }
+                    });
+                } else {
+                    listEl.classList.remove('active');
+                }
+            });
+
+            localStorage.setItem('calocal-state-3', JSON.stringify(state));
+            updateDash();
+        }
+
+        function updateDash() {
+            document.getElementById('dash-pro').textContent = state.pro.toFixed(1);
+            document.getElementById('dash-car').textContent = state.car.toFixed(1);
+            document.getElementById('dash-fat').textContent = state.fat.toFixed(1);
+
+            const btn = document.getElementById('tracker-mode-btn');
+            btn.textContent = state.showRemaining ? "Show Intake" : "Show Remaining";
+
+            let rem = state.target - state.consumed;
+            if (rem < 0) rem = 0;
+
+            if (state.showRemaining) {
+                document.getElementById('cals-display').innerHTML = `${rem.toFixed(0)}`;
+                document.getElementById('cals-label').textContent = "Remaining Calories";
+            } else {
+                document.getElementById('cals-display').innerHTML = `${state.consumed.toFixed(0)} <span id="cals-target-display" style="font-size:1.1rem; color:var(--text-muted); font-weight:600;">/ ${state.target}</span>`;
+                document.getElementById('cals-label').textContent = "Intake Calorie";
+            }
+
+            const circle = document.getElementById('circle-progress');
+            const circumference = 2 * Math.PI * 85;
+            const maxFill = circumference / 2;
+
+            let percentArr = (state.consumed / state.target);
+            if (percentArr > 1) percentArr = 1;
+
+            const fillAmount = maxFill * percentArr;
+            circle.style.strokeDasharray = `${circumference}`;
+            circle.style.strokeDashoffset = `${circumference - fillAmount}`;
+        }
+
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+
+</html>

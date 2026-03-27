@@ -1,0 +1,6 @@
+{
+  "appId": "com.sarvesh.calocal",
+  "appName": "CaloCal",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}
